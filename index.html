@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessibility Quick Audit</title>
+<meta name="description" content="Paste HTML and get a client-side accessibility audit. Real WCAG-aligned checks for alt text, labels, headings, landmarks, links, ARIA, tables, media, and color contrast. Runs entirely in your browser.">
+<link rel="canonical" href="https://0xelitesystem.github.io/accessibility-quick-audit/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Accessibility Quick Audit">
+<meta property="og:description" content="Paste HTML and get a client-side accessibility audit. Real WCAG-aligned checks that run entirely in your browser.">
+<meta property="og:url" content="https://0xelitesystem.github.io/accessibility-quick-audit/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Accessibility Quick Audit">
+<meta name="twitter:description" content="Paste HTML and get a client-side accessibility audit. Real WCAG-aligned checks that run entirely in your browser.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Accessibility Quick Audit",
+  "description": "Paste an HTML snippet or full page source and run a real client-side accessibility audit. Reports concrete WCAG-aligned issues with severity, the offending element, and how to fix it.",
+  "url": "https://0xelitesystem.github.io/accessibility-quick-audit/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "0xelitesystem"
+  }
+}
+</script>
+<style>
+:root {
+  --bg: #fafaf6;
+  --surface: #ffffff;
+  --ink: #0a1d1e;
+  --ink-soft: #2c4a4c;
+  --rule: #c8d4d3;
+  --teal: #0f5c60;
+  --teal-deep: #0a4548;
+  --gold: #b07d2a;
+  --gold-deep: #8a611f;
+  --code-bg: #f0ebe1;
+  --err: #8b1a1a;
+  --err-bg: #f7e6e6;
+  --warn: #8a5a00;
+  --warn-bg: #f6eed9;
+  --info: #204a7a;
+  --info-bg: #e3ecf6;
+  --ok: #1a5c2e;
+}
+[data-theme="dark"] {
+  --bg: #0c1c1d;
+  --surface: #14292a;
+  --ink: #e8ebe6;
+  --ink-soft: #b0c0bd;
+  --rule: #2a4042;
+  --teal: #4ab4ba;
+  --teal-deep: #6dc8ce;
+  --gold: #d4a155;
+  --gold-deep: #e6b876;
+  --code-bg: #0a1718;
+  --err: #f0a0a0;
+  --err-bg: #331616;
+  --warn: #e6c46f;
+  --warn-bg: #302810;
+  --info: #9bc0ec;
+  --info-bg: #14243a;
+  --ok: #7bd48f;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  line-height: 1.55;
+}
+.wrap { max-width: 1100px; margin: 0 auto; }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid var(--teal);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--teal);
+}
+.tag {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  color: var(--gold-deep);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+[data-theme="dark"] .tag { color: var(--gold); }
+.theme-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.theme-btn:hover { border-color: var(--teal); color: var(--teal); }
+.theme-btn:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.lede {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.75rem;
+  max-width: 68ch;
+}
+.input-box {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+  border-radius: 3px;
+}
+label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+textarea {
+  width: 100%;
+  min-height: 180px;
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  resize: vertical;
+  border-radius: 2px;
+}
+textarea:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+.input-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 2px;
+}
+button:hover { border-color: var(--teal); }
+button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+button.primary {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--surface);
+  font-weight: 600;
+}
+[data-theme="dark"] button.primary { color: var(--bg) !important; }
+button.primary:hover { background: var(--teal-deep); border-color: var(--teal-deep); }
+.privacy-note {
+  font-size: 0.78rem;
+  color: var(--gold-deep);
+  margin-top: 0.75rem;
+}
+[data-theme="dark"] .privacy-note { color: var(--gold); }
+.results { display: none; }
+.results.show { display: block; }
+.summary {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-radius: 3px;
+}
+.score-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.score-badge {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 0.35rem 0.9rem;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+.score-detail { font-size: 0.85rem; color: var(--ink-soft); }
+.counts { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.count-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 2px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.count-pill:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.count-pill[aria-pressed="false"] { opacity: 0.45; }
+.count-pill .dot {
+  width: 0.6rem; height: 0.6rem; border-radius: 50%;
+}
+.dot-error { background: var(--err); }
+.dot-warning { background: var(--warn); }
+.dot-info { background: var(--info); }
+.dot-ok { background: var(--ok); }
+.finding {
+  border: 1px solid var(--rule);
+  border-left-width: 4px;
+  border-radius: 2px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.75rem;
+  background: var(--surface);
+}
+.finding.error { border-left-color: var(--err); }
+.finding.warning { border-left-color: var(--warn); }
+.finding.info { border-left-color: var(--info); }
+.finding-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+.badge {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+}
+.badge.error { background: var(--err-bg); color: var(--err); }
+.badge.warning { background: var(--warn-bg); color: var(--warn); }
+.badge.info { background: var(--info-bg); color: var(--info); }
+.finding-rule { font-weight: 600; font-size: 0.95rem; }
+.wcag {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+.finding-snippet {
+  background: var(--code-bg);
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.78rem;
+  padding: 0.55rem 0.7rem;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink);
+}
+.finding-fix { font-size: 0.85rem; color: var(--ink-soft); }
+.finding-fix strong { color: var(--ink); font-weight: 600; }
+.no-issues {
+  color: var(--ok);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.6rem 0;
+}
+.error-msg {
+  color: var(--err);
+  font-size: 0.85rem;
+  margin-top: 0.85rem;
+  padding: 0.65rem;
+  background: var(--err-bg);
+  border-left: 3px solid var(--err);
+  border-radius: 2px;
+}
+.group-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 1.25rem 0 0.6rem;
+}
+footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+footer a { color: var(--teal); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 640px) {
+  body { padding: 1rem 0.75rem; }
+  h1 { font-size: 1.4rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Accessibility Quick Audit</h1>
+    <div class="tag">Paste HTML, get WCAG findings in your browser</div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" type="button">Dark</button>
+</header>
+
+<p class="lede">Paste an HTML snippet or full page source below. The tool parses it safely (never executes it) and runs a set of WCAG-aligned accessibility checks: alt text, form labels, heading structure, landmarks, link text, ARIA usage, data tables, media captions, and inline color contrast. Each finding tells you the severity, the offending element, the relevant success criterion, and a one-line fix.</p>
+
+<div class="input-box">
+  <label for="html-input">HTML source</label>
+  <textarea id="html-input" placeholder="Paste an HTML snippet or a full page here..." spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+  <div class="input-row">
+    <button class="primary" id="audit-btn" type="button">Run audit</button>
+    <button id="example-btn" type="button">Load example</button>
+    <button id="clear-btn" type="button">Clear</button>
+  </div>
+  <p class="privacy-note">Everything runs locally in your browser. The HTML you paste is never sent to any server.</p>
+</div>
+
+<div class="results" id="results" aria-live="polite">
+  <div class="summary">
+    <div class="score-row">
+      <span class="score-badge" id="score-badge">--</span>
+      <span class="score-detail" id="score-detail"></span>
+    </div>
+    <div class="counts" id="counts" role="group" aria-label="Filter findings by severity"></div>
+  </div>
+  <div id="findings"></div>
+</div>
+
+<div id="error-box" aria-live="assertive"></div>
+
+<footer>
+  <div>Accessibility Quick Audit. Open source, MIT licensed. A static heuristic linter, not a full conformance audit.</div>
+  <div><a href="https://elitesystem.ai" target="_blank" rel="noopener">elitesystem.ai</a></div>
+</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+// Theme toggle
+const themeBtn = $("theme-toggle");
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  themeBtn.textContent = t === "dark" ? "Light" : "Dark";
+  themeBtn.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+}
+themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "light";
+  setTheme(cur === "dark" ? "light" : "dark");
+});
+
+// -------- helpers --------
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function truncate(s, n) {
+  s = s.replace(/\s+/g, " ").trim();
+  return s.length > n ? s.slice(0, n) + "…" : s;
+}
+// A short escaped snippet of an element's opening tag (and text if short).
+function snippet(el, maxLen) {
+  maxLen = maxLen || 140;
+  let html;
+  try {
+    const clone = el.cloneNode(false);
+    let open = clone.outerHTML || "";
+    // outerHTML of a void/empty clone gives the opening tag (+ closing for non-void)
+    const gt = open.indexOf(">");
+    open = gt >= 0 ? open.slice(0, gt + 1) : open;
+    let text = (el.textContent || "").replace(/\s+/g, " ").trim();
+    html = open;
+    if (text) html += truncate(text, 40) + "</" + el.tagName.toLowerCase() + ">";
+  } catch (e) {
+    html = el.tagName ? "<" + el.tagName.toLowerCase() + ">" : "(element)";
+  }
+  return escapeHtml(truncate(html, maxLen));
+}
+
+// Accessible name approximation for interactive elements.
+function accessibleName(el, doc) {
+  const al = el.getAttribute("aria-label");
+  if (al && al.trim()) return al.trim();
+  const lb = el.getAttribute("aria-labelledby");
+  if (lb) {
+    const names = lb.split(/\s+/).map((id) => {
+      const t = doc.getElementById(id);
+      return t ? (t.textContent || "").trim() : "";
+    }).filter(Boolean);
+    if (names.length) return names.join(" ");
+  }
+  const title = el.getAttribute("title");
+  const text = (el.textContent || "").replace(/\s+/g, " ").trim();
+  if (text) return text;
+  // image alt inside link/button
+  const img = el.querySelector && el.querySelector("img[alt]");
+  if (img && img.getAttribute("alt").trim()) return img.getAttribute("alt").trim();
+  const val = el.getAttribute && el.getAttribute("value");
+  if (val && (el.getAttribute("type") === "submit" || el.getAttribute("type") === "button")) return val.trim();
+  if (title && title.trim()) return title.trim();
+  return "";
+}
+
+// Valid ARIA roles (WAI-ARIA 1.2, common set).
+const VALID_ROLES = new Set([
+  "alert","alertdialog","application","article","banner","blockquote","button","caption","cell",
+  "checkbox","code","columnheader","combobox","complementary","contentinfo","definition","deletion",
+  "dialog","directory","document","emphasis","feed","figure","form","generic","grid","gridcell","group",
+  "heading","img","insertion","link","list","listbox","listitem","log","main","marquee","math","menu",
+  "menubar","menuitem","menuitemcheckbox","menuitemradio","meter","navigation","none","note","option",
+  "paragraph","presentation","progressbar","radio","radiogroup","region","row","rowgroup","rowheader",
+  "scrollbar","search","searchbox","separator","slider","spinbutton","status","strong","subscript",
+  "superscript","switch","tab","table","tablist","tabpanel","term","textbox","time","timer","toolbar",
+  "tooltip","tree","treegrid","treeitem"
+]);
+
+// Native elements whose implicit role makes an explicit matching role redundant.
+const REDUNDANT_ROLE = {
+  "a": "link", "button": "button", "nav": "navigation", "main": "main", "ul": "list",
+  "ol": "list", "li": "listitem", "table": "table", "header": "banner", "footer": "contentinfo",
+  "h1": "heading", "h2": "heading", "h3": "heading", "h4": "heading", "h5": "heading",
+  "h6": "heading", "article": "article", "aside": "complementary", "form": "form",
+  "img": "img", "select": "listbox"
+};
+
+// -------- contrast math (WCAG) --------
+function parseColor(str) {
+  if (!str) return null;
+  str = str.trim().toLowerCase();
+  const named = {
+    black: [0,0,0], white: [255,255,255], red: [255,0,0], green: [0,128,0],
+    blue: [0,0,255], gray: [128,128,128], grey: [128,128,128], silver: [192,192,192],
+    yellow: [255,255,0], navy: [0,0,128], teal: [0,128,128], purple: [128,0,128],
+    orange: [255,165,0], maroon: [128,0,0], lime: [0,255,0], aqua: [0,255,255]
+  };
+  if (named[str]) return named[str];
+  let m = str.match(/^#([0-9a-f]{3})$/);
+  if (m) {
+    const h = m[1];
+    return [parseInt(h[0]+h[0],16), parseInt(h[1]+h[1],16), parseInt(h[2]+h[2],16)];
+  }
+  m = str.match(/^#([0-9a-f]{6})$/);
+  if (m) {
+    const h = m[1];
+    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  }
+  m = str.match(/^rgba?\(\s*([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)/);
+  if (m) return [parseFloat(m[1]), parseFloat(m[2]), parseFloat(m[3])];
+  return null;
+}
+function relLuminance(rgb) {
+  const c = rgb.map((v) => {
+    v = v / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function contrastRatio(fg, bg) {
+  const l1 = relLuminance(fg), l2 = relLuminance(bg);
+  const light = Math.max(l1, l2), dark = Math.min(l1, l2);
+  return (light + 0.05) / (dark + 0.05);
+}
+function styleProp(styleStr, prop) {
+  if (!styleStr) return null;
+  const re = new RegExp("(?:^|;)\\s*" + prop + "\\s*:\\s*([^;]+)", "i");
+  const m = styleStr.match(re);
+  return m ? m[1].trim() : null;
+}
+
+// -------- the audit --------
+function audit(html) {
+  const findings = [];
+  const add = (severity, rule, wcag, el, fix, snippetStr) => {
+    findings.push({
+      severity, rule, wcag, fix,
+      snippet: snippetStr !== undefined ? snippetStr : (el ? snippet(el) : "")
+    });
+  };
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  const looksLikeFullDoc = /<html[\s>]/i.test(html) || /<!doctype/i.test(html);
+
+  // ---- Document-level structure ----
+  if (looksLikeFullDoc) {
+    const htmlEl = doc.documentElement;
+    if (htmlEl && (!htmlEl.getAttribute("lang") || !htmlEl.getAttribute("lang").trim())) {
+      add("warning", "Missing lang on <html>", "WCAG 3.1.1 Language of Page", null,
+        "Add a language attribute, for example <html lang=\"en\">, so screen readers use the correct pronunciation.",
+        "&lt;html&gt;");
+    }
+    const title = doc.querySelector("title");
+    if (!title || !title.textContent.trim()) {
+      add("warning", "Missing or empty <title>", "WCAG 2.4.2 Page Titled", null,
+        "Give the page a descriptive <title> element inside <head>.", "&lt;head&gt; (no &lt;title&gt;)");
+    }
+    if (!doc.querySelector("main, [role=main]")) {
+      add("warning", "No main landmark", "WCAG 1.3.1 Info and Relationships", null,
+        "Wrap the primary content in a <main> element so users can skip to it.", "(document)");
+    }
+  }
+
+  // ---- Headings ----
+  const headings = Array.from(doc.querySelectorAll("h1,h2,h3,h4,h5,h6"));
+  const h1s = headings.filter((h) => h.tagName === "H1");
+  if (looksLikeFullDoc && h1s.length === 0 && headings.length > 0) {
+    add("warning", "No <h1> heading", "WCAG 2.4.6 Headings and Labels", null,
+      "Add a single top-level <h1> that describes the page.", "(document)");
+  }
+  if (h1s.length > 1) {
+    add("info", "Multiple <h1> headings", "WCAG 1.3.1 Info and Relationships", h1s[1],
+      "Prefer a single <h1> per page and use <h2> to <h6> for sub-sections.");
+  }
+  let prevLevel = 0;
+  headings.forEach((h) => {
+    const level = parseInt(h.tagName.slice(1), 10);
+    if (prevLevel && level > prevLevel + 1) {
+      add("warning", "Skipped heading level (h" + prevLevel + " to h" + level + ")",
+        "WCAG 1.3.1 Info and Relationships", h,
+        "Do not skip heading levels. After an h" + prevLevel + ", the next deeper heading should be h" + (prevLevel + 1) + ".");
+    }
+    prevLevel = level;
+  });
+
+  // ---- Images ----
+  Array.from(doc.querySelectorAll("img")).forEach((img) => {
+    const hasAlt = img.hasAttribute("alt");
+    const alt = (img.getAttribute("alt") || "").trim();
+    const roleNone = ["none", "presentation"].includes((img.getAttribute("role") || "").toLowerCase());
+    const ariaHidden = (img.getAttribute("aria-hidden") || "").toLowerCase() === "true";
+    if (!hasAlt) {
+      if (!roleNone && !ariaHidden) {
+        add("error", "Image missing alt attribute", "WCAG 1.1.1 Non-text Content", img,
+          "Add descriptive alt text, or alt=\"\" if the image is purely decorative.");
+      }
+    } else if (alt !== "") {
+      if (/\.(jpg|jpeg|png|gif|svg|webp|bmp|avif)$/i.test(alt) || /^(image|photo|picture|img|graphic)$/i.test(alt)) {
+        add("warning", "Alt text is a filename or generic word", "WCAG 1.1.1 Non-text Content", img,
+          "Replace the alt value with a description of what the image conveys, not its filename or the word \"image\".");
+      }
+    } else {
+      // alt="" present
+      add("info", "Decorative image (alt=\"\")", "WCAG 1.1.1 Non-text Content", img,
+        "Confirmed decorative. Empty alt is correct only if the image adds no information. Otherwise describe it.");
+    }
+  });
+
+  // ---- Form controls ----
+  Array.from(doc.querySelectorAll("input,select,textarea")).forEach((ctrl) => {
+    const type = (ctrl.getAttribute("type") || "").toLowerCase();
+    if (ctrl.tagName === "INPUT" && ["hidden", "submit", "button", "reset", "image"].includes(type)) {
+      if (ctrl.tagName === "INPUT" && !ctrl.hasAttribute("type")) { /* handled below */ }
+      if (type !== "hidden" && type === "image" && !accessibleName(ctrl, doc) && !(ctrl.getAttribute("alt") || "").trim()) {
+        add("error", "Image input has no accessible name", "WCAG 4.1.2 Name, Role, Value", ctrl,
+          "Add an alt attribute describing the button's action.");
+      }
+      return;
+    }
+    // Missing type on input
+    if (ctrl.tagName === "INPUT" && !ctrl.hasAttribute("type")) {
+      add("info", "Input missing type attribute", "WCAG 4.1.2 Name, Role, Value", ctrl,
+        "Add an explicit type (for example type=\"text\") so the control's purpose is clear.");
+    }
+    // Label association
+    const id = ctrl.getAttribute("id");
+    let labelled = false;
+    if (ctrl.getAttribute("aria-label") && ctrl.getAttribute("aria-label").trim()) labelled = true;
+    if (!labelled && ctrl.getAttribute("aria-labelledby")) {
+      const ok = ctrl.getAttribute("aria-labelledby").split(/\s+/).some((rid) => doc.getElementById(rid));
+      if (ok) labelled = true;
+    }
+    if (!labelled && id) {
+      if (doc.querySelector('label[for="' + (window.CSS && CSS.escape ? CSS.escape(id) : id.replace(/"/g, '\\"')) + '"]')) labelled = true;
+    }
+    if (!labelled) {
+      let p = ctrl.parentElement;
+      while (p) { if (p.tagName === "LABEL") { labelled = true; break; } p = p.parentElement; }
+    }
+    if (!labelled && (ctrl.getAttribute("title") || "").trim()) labelled = true;
+    if (!labelled) {
+      add("error", "Form control has no associated label", "WCAG 1.3.1 / 4.1.2 Name, Role, Value", ctrl,
+        "Associate a <label for=\"...\">, wrap the control in a <label>, or add aria-label.");
+    }
+  });
+
+  // ---- Buttons with no accessible name ----
+  Array.from(doc.querySelectorAll("button")).forEach((btn) => {
+    if (!accessibleName(btn, doc)) {
+      add("error", "Button has no accessible name", "WCAG 4.1.2 Name, Role, Value", btn,
+        "Add visible text, an aria-label, or an <img> with alt text inside the button.");
+    }
+  });
+
+  // ---- Links ----
+  Array.from(doc.querySelectorAll("a[href]")).forEach((a) => {
+    const name = accessibleName(a, doc);
+    if (!name) {
+      add("error", "Link has no accessible text", "WCAG 2.4.4 Link Purpose (In Context)", a,
+        "Give the link text, an aria-label, or alt text on its inner image. Icon-only links need an accessible name.");
+    } else if (/^(click here|read more|learn more|here|more|link|this)$/i.test(name.trim())) {
+      add("info", "Generic link text", "WCAG 2.4.4 Link Purpose (In Context)", a,
+        "Use link text that describes the destination, not \"" + truncate(name, 20) + "\".");
+    }
+  });
+
+  // ---- ARIA ----
+  Array.from(doc.querySelectorAll("[role]")).forEach((el) => {
+    const roles = (el.getAttribute("role") || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+    roles.forEach((r) => {
+      if (!VALID_ROLES.has(r)) {
+        add("error", "Invalid ARIA role \"" + truncate(r, 24) + "\"", "WCAG 4.1.2 Name, Role, Value", el,
+          "Use a valid WAI-ARIA role, or remove the attribute if a native element already conveys the role.");
+      }
+    });
+    const tag = el.tagName.toLowerCase();
+    if (roles.length === 1 && REDUNDANT_ROLE[tag] === roles[0]) {
+      add("info", "Redundant role on native <" + tag + ">", "WCAG 4.1.2 Name, Role, Value", el,
+        "The <" + tag + "> element already has the implicit role \"" + roles[0] + "\". The explicit role is unnecessary.");
+    }
+  });
+  // aria-* IDREF references that point at nonexistent ids
+  const IDREF_ATTRS = ["aria-labelledby", "aria-describedby", "aria-controls", "aria-owns", "aria-details", "aria-flowto"];
+  Array.from(doc.querySelectorAll("*")).forEach((el) => {
+    IDREF_ATTRS.forEach((attr) => {
+      const val = el.getAttribute && el.getAttribute(attr);
+      if (val && val.trim()) {
+        const missing = val.trim().split(/\s+/).filter((rid) => !doc.getElementById(rid));
+        if (missing.length) {
+          add("error", attr + " points to missing id", "WCAG 1.3.1 / 4.1.2 Name, Role, Value", el,
+            "The id " + missing.map((m) => '"' + truncate(m, 20) + '"').join(", ") + " does not exist in the parsed HTML. Fix the reference or add the target element.");
+        }
+      }
+    });
+  });
+  // Positive tabindex
+  Array.from(doc.querySelectorAll("[tabindex]")).forEach((el) => {
+    const ti = parseInt(el.getAttribute("tabindex"), 10);
+    if (!isNaN(ti) && ti > 0) {
+      add("warning", "Positive tabindex (" + ti + ")", "WCAG 2.4.3 Focus Order", el,
+        "Avoid tabindex greater than 0. It overrides the natural tab order and is hard to maintain. Use 0 or restructure the DOM.");
+    }
+  });
+
+  // ---- Landmarks: multiple nav without labels ----
+  const navs = Array.from(doc.querySelectorAll("nav, [role=navigation]"));
+  if (navs.length > 1) {
+    navs.forEach((nav) => {
+      const labelled = (nav.getAttribute("aria-label") || "").trim() ||
+        (nav.getAttribute("aria-labelledby") || "").trim();
+      if (!labelled) {
+        add("warning", "Multiple <nav> landmarks, one unlabelled", "WCAG 1.3.1 Info and Relationships", nav,
+          "When a page has more than one navigation region, give each an aria-label so they can be told apart.");
+      }
+    });
+  }
+
+  // ---- Tables ----
+  Array.from(doc.querySelectorAll("table")).forEach((table) => {
+    const role = (table.getAttribute("role") || "").toLowerCase();
+    if (["presentation", "none"].includes(role)) return; // layout table
+    const ths = table.querySelectorAll("th");
+    const rows = table.querySelectorAll("tr");
+    if (rows.length > 1 && ths.length === 0) {
+      add("warning", "Data table has no <th> header cells", "WCAG 1.3.1 Info and Relationships", table,
+        "Mark header cells with <th> so screen readers can announce row and column headers.");
+    } else if (ths.length > 0) {
+      const missingScope = Array.from(ths).some((th) => !(th.getAttribute("scope") || "").trim());
+      if (missingScope && ths.length > 1) {
+        add("info", "Table headers missing scope", "WCAG 1.3.1 Info and Relationships", table,
+          "Add scope=\"col\" or scope=\"row\" to <th> cells so associations are unambiguous.");
+      }
+    }
+  });
+
+  // ---- Media captions ----
+  Array.from(doc.querySelectorAll("video,audio")).forEach((m) => {
+    const tracks = Array.from(m.querySelectorAll("track"));
+    const hasCaptions = tracks.some((t) => ["captions", "subtitles"].includes((t.getAttribute("kind") || "").toLowerCase()));
+    if (!hasCaptions) {
+      add("warning", "<" + m.tagName.toLowerCase() + "> has no captions track", "WCAG 1.2.2 Captions (Prerecorded)", m,
+        "Add a <track kind=\"captions\"> so the content is available to deaf and hard-of-hearing users.");
+    }
+  });
+
+  // ---- Inline contrast ----
+  Array.from(doc.querySelectorAll("[style]")).forEach((el) => {
+    const style = el.getAttribute("style");
+    const fgStr = styleProp(style, "color");
+    const bgStr = styleProp(style, "background-color") || styleProp(style, "background");
+    if (fgStr && bgStr) {
+      const fg = parseColor(fgStr), bg = parseColor(bgStr);
+      if (fg && bg) {
+        const ratio = contrastRatio(fg, bg);
+        if (ratio < 4.5) {
+          add("warning", "Low color contrast (" + ratio.toFixed(2) + ":1)", "WCAG 1.4.3 Contrast (Minimum)", el,
+            "Normal text needs at least 4.5:1. Darken the text or lighten the background until the ratio reaches 4.5:1.");
+        }
+      }
+    }
+  });
+
+  return findings;
+}
+
+// -------- rendering --------
+const SEV_ORDER = { error: 0, warning: 1, info: 2 };
+const SEV_LABEL = { error: "Errors", warning: "Warnings", info: "Info" };
+let lastFindings = [];
+const activeFilters = { error: true, warning: true, info: true };
+
+function render(findings) {
+  lastFindings = findings;
+  const counts = { error: 0, warning: 0, info: 0 };
+  findings.forEach((f) => { counts[f.severity]++; });
+
+  // Score: 100 minus weighted penalties, floored at 0.
+  const penalty = counts.error * 10 + counts.warning * 4 + counts.info * 1;
+  const score = Math.max(0, 100 - penalty);
+  const badge = $("score-badge");
+  badge.textContent = score;
+  let scoreColor = "var(--ok)";
+  if (score < 60) scoreColor = "var(--err)";
+  else if (score < 85) scoreColor = "var(--warn)";
+  badge.style.color = scoreColor;
+  badge.style.borderColor = scoreColor;
+  badge.setAttribute("aria-label", "Heuristic score " + score + " out of 100");
+
+  const total = findings.length;
+  $("score-detail").textContent = total === 0
+    ? "No issues detected by these heuristic checks."
+    : total + " finding" + (total === 1 ? "" : "s") + " across the checks below. Score is a rough heuristic, not a WCAG conformance grade.";
+
+  // Count pills (also act as filters)
+  const countsEl = $("counts");
+  countsEl.innerHTML = "";
+  ["error", "warning", "info"].forEach((sev) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "count-pill";
+    btn.setAttribute("aria-pressed", String(activeFilters[sev]));
+    btn.innerHTML = '<span class="dot dot-' + sev + '"></span>' +
+      counts[sev] + " " + SEV_LABEL[sev] + (activeFilters[sev] ? "" : " (hidden)");
+    btn.addEventListener("click", () => {
+      activeFilters[sev] = !activeFilters[sev];
+      render(lastFindings);
+    });
+    countsEl.appendChild(btn);
+  });
+
+  const findingsEl = $("findings");
+  findingsEl.innerHTML = "";
+
+  if (total === 0) {
+    const div = document.createElement("div");
+    div.className = "no-issues";
+    div.textContent = "No issues detected. Remember: automated checks catch only part of what matters. Manual keyboard and screen reader testing is still needed.";
+    findingsEl.appendChild(div);
+    $("results").classList.add("show");
+    return;
+  }
+
+  const sorted = findings.slice().sort((a, b) => SEV_ORDER[a.severity] - SEV_ORDER[b.severity]);
+  let currentGroup = null;
+  let anyShown = false;
+  sorted.forEach((f) => {
+    if (!activeFilters[f.severity]) return;
+    anyShown = true;
+    if (f.severity !== currentGroup) {
+      currentGroup = f.severity;
+      const gt = document.createElement("div");
+      gt.className = "group-title";
+      gt.textContent = SEV_LABEL[f.severity] + " (" + counts[f.severity] + ")";
+      findingsEl.appendChild(gt);
+    }
+    const div = document.createElement("div");
+    div.className = "finding " + f.severity;
+    let inner = '<div class="finding-head">' +
+      '<span class="badge ' + f.severity + '">' + f.severity + '</span>' +
+      '<span class="finding-rule">' + escapeHtml(f.rule) + '</span>' +
+      '<span class="wcag">' + escapeHtml(f.wcag) + '</span>' +
+      '</div>';
+    if (f.snippet) inner += '<div class="finding-snippet">' + f.snippet + '</div>';
+    inner += '<div class="finding-fix"><strong>Fix:</strong> ' + escapeHtml(f.fix) + '</div>';
+    div.innerHTML = inner;
+    findingsEl.appendChild(div);
+  });
+
+  if (!anyShown) {
+    const div = document.createElement("div");
+    div.className = "score-detail";
+    div.textContent = "All findings are hidden by the current filters. Toggle a severity above to show them.";
+    findingsEl.appendChild(div);
+  }
+
+  $("results").classList.add("show");
+}
+
+function run() {
+  $("error-box").innerHTML = "";
+  const html = $("html-input").value;
+  if (!html.trim()) {
+    $("error-box").innerHTML = '<div class="error-msg">Paste some HTML to audit.</div>';
+    $("results").classList.remove("show");
+    return;
+  }
+  let findings;
+  try {
+    findings = audit(html);
+  } catch (e) {
+    $("error-box").innerHTML = '<div class="error-msg">Could not parse the HTML: ' + escapeHtml(e.message) + '</div>';
+    $("results").classList.remove("show");
+    return;
+  }
+  render(findings);
+}
+
+// -------- example --------
+const EXAMPLE = [
+'<!DOCTYPE html>',
+'<html>',
+'<head>',
+'  <meta charset="utf-8">',
+'</head>',
+'<body>',
+'  <nav><a href="/">Home</a></nav>',
+'  <nav><a href="/help">Help</a></nav>',
+'',
+'  <h1>Welcome</h1>',
+'  <h1>Second top heading</h1>',
+'  <h4>Jumped down two levels</h4>',
+'',
+'  <img src="logo.png">',
+'  <img src="hero.jpg" alt="hero.jpg">',
+'  <img src="divider.png" alt="">',
+'',
+'  <form>',
+'    <input type="email" name="email" placeholder="Email">',
+'    <input name="phone">',
+'    <select><option>One</option></select>',
+'    <button></button>',
+'  </form>',
+'',
+'  <a href="/report"><img src="pdf-icon.png"></a>',
+'  <a href="/more">click here</a>',
+'',
+'  <div role="buton" tabindex="3">Fake button</div>',
+'  <span aria-labelledby="nope">Labelled by nothing</span>',
+'  <a href="/x" role="link">Redundant role</a>',
+'',
+'  <p style="color:#aaaaaa;background-color:#ffffff">Low contrast text</p>',
+'',
+'  <table>',
+'    <tr><td>Name</td><td>Score</td></tr>',
+'    <tr><td>Ada</td><td>99</td></tr>',
+'  </table>',
+'',
+'  <video src="clip.mp4"></video>',
+'</body>',
+'</html>'
+].join("\n");
+
+$("example-btn").addEventListener("click", () => {
+  $("html-input").value = EXAMPLE;
+  run();
+});
+$("clear-btn").addEventListener("click", () => {
+  $("html-input").value = "";
+  $("results").classList.remove("show");
+  $("error-box").innerHTML = "";
+});
+$("audit-btn").addEventListener("click", run);
+$("html-input").addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") run();
+});
+
+setTheme("light");
+</script>
+</body>
+</html>
