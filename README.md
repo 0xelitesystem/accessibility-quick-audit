@@ -34,6 +34,10 @@ This is a static heuristic linter, not a full WCAG conformance audit. It checks 
 
 The HTML you paste is processed entirely in your browser and is never sent to any server. There are no analytics, no tracking, and no network requests. You can verify this by viewing the page source or by opening your browser's developer tools and watching the network tab while you run an audit.
 
+## More
+
+Part of a catalog of single-file browser tools and plain-language references, all MIT licensed and dependency-free: [0xelitesystem.github.io](https://0xelitesystem.github.io/). Built by [elitesystem.ai](https://elitesystem.ai).
+
 ## License
 
 MIT. Copyright 0xelitesystem 2026.
