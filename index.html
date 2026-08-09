@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Accessibility Quick Audit</title>
+<title>Accessibility Quick Audit - paste an HTML snippet or a full page's source</title>
 <meta name="description" content="Paste HTML and get a client-side accessibility audit. Real WCAG-aligned checks for alt text, labels, headings, landmarks, links, ARIA, tables, media, and color contrast. Runs entirely in your browser.">
 <link rel="canonical" href="https://0xelitesystem.github.io/accessibility-quick-audit/">
 <meta property="og:type" content="website">
@@ -399,7 +399,7 @@ function escapeHtml(s) {
 }
 function truncate(s, n) {
   s = s.replace(/\s+/g, " ").trim();
-  return s.length > n ? s.slice(0, n) + "…" : s;
+  return s.length > n ? s.slice(0, n) + "..." : s;
 }
 // A short escaped snippet of an element's opening tag (and text if short).
 function snippet(el, maxLen) {
