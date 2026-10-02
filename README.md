@@ -2,9 +2,18 @@
 
 Paste an HTML snippet or a full page's source and get a real client-side accessibility audit. The tool parses your HTML safely (it never executes it) and reports concrete WCAG-aligned issues with a severity, the offending element, the relevant success criterion, and a one-line fix. Everything runs in your browser with no external dependencies and works offline.
 
-## Live demo
+**Live demo:** https://0xelitesystem.github.io/accessibility-quick-audit/
 
-https://0xelitesystem.github.io/accessibility-quick-audit/
+## Use
+
+1. Paste an HTML snippet or a full page's source into the HTML source box, or click Load example.
+2. Click Run audit.
+3. Read the findings, grouped by severity, each with the element, the WCAG success criterion and a one-line fix. Toggle severities on or off to focus.
+4. Fix the markup and run the audit again.
+
+## Why this exists
+
+A first accessibility pass usually means installing a browser extension or handing a URL to a hosted scanner. This tool takes pasted source, parses it without running it, and reports the machine-detectable problems. It is one HTML file with no tracking, MIT licensed.
 
 ## Features
 
@@ -32,7 +41,20 @@ This is a static heuristic linter, not a full WCAG conformance audit. It checks 
 
 ## Privacy
 
-The HTML you paste is processed entirely in your browser and is never sent to any server. There are no analytics, no tracking, and no network requests. You can verify this by viewing the page source or by opening your browser's developer tools and watching the network tab while you run an audit.
+The HTML you paste is processed entirely in your browser and is never sent to any server. There are no analytics, no tracking, and no network requests. You can verify this by viewing the page source or by opening your browser's developer tools and watching the network tab while you run an audit. The only thing the page stores is your light or dark theme choice, in localStorage under the key `theme`.
+
+## Run locally
+
+```
+git clone https://github.com/0xelitesystem/accessibility-quick-audit
+cd accessibility-quick-audit
+```
+
+Open `index.html` in any modern browser, or serve the folder with `python -m http.server 8000` and visit http://localhost:8000/.
+
+## Build
+
+No build step. The whole tool is one `index.html` file with inline CSS and JavaScript.
 
 ## More
 
